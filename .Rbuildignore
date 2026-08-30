@@ -1,2 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^AGENTS\.md$
+^CONTEXT\.md$
+^docs$
+^\.claude$
+^\.github$
