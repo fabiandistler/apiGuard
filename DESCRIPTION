@@ -1,9 +1,8 @@
 Package: apiGuard
 Title: Detect Breaking API Changes Between R Package Versions
 Version: 0.1.0.9000
-Authors@R: person("YOUR", "NAME", email = "you@example.com",
-    role = c("aut", "cre"),
-    comment = "PLACEHOLDER: replace with your name/email")
+Authors@R: person("Fabian", "Distler", email = "fdistlermpi@gmail.com",
+    role = c("aut", "cre"))
 Description: Compares the public API of two versions of an R package
     (exported functions, formal arguments, default values, argument order)
     and classifies every change as breaking, feature, or behaviour-level.
@@ -12,6 +11,8 @@ Description: Compares the public API of two versions of an R package
     package sources (no installation required) and can compare git refs,
     so it also works pre-CRAN-release.
 License: MIT + file LICENSE
+URL: https://github.com/fabiandistler/apiGuard
+BugReports: https://github.com/fabiandistler/apiGuard/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Suggests:

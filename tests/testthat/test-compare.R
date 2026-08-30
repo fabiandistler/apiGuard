@@ -60,3 +60,51 @@ test_that("no changes -> patch", {
   expect_length(d$changes, 0)
   expect_equal(suggest_version_bump(d)$bump, "patch")
 })
+
+test_that("an optional argument inserted before an existing one is breaking", {
+  d_old <- make_pkg("f <- function(a, b = 1) a + b", "f")
+  d_new <- make_pkg("f <- function(a, extra = 10, b = 1) a + b", "f")
+  d <- compare_api(d_old, d_new)
+  expect_equal(vapply(d$changes, `[[`, "", "type"), "arg_inserted")
+  expect_equal(vapply(d$changes, `[[`, "", "severity"), "breaking")
+  expect_equal(suggest_version_bump(d)$bump, "major")
+})
+
+test_that("an optional argument appended at the end stays a feature", {
+  d_old <- make_pkg("f <- function(a, b = 1) a + b", "f")
+  d_new <- make_pkg("f <- function(a, b = 1, extra = 10) a + b", "f")
+  d <- compare_api(d_old, d_new)
+  expect_equal(vapply(d$changes, `[[`, "", "type"), "arg_added_optional")
+  expect_equal(suggest_version_bump(d)$bump, "minor")
+})
+
+test_that("adding dots is a feature, removing them is breaking", {
+  d_none <- make_pkg("f <- function(a) a", "f")
+  d_dots <- make_pkg("f <- function(a, ...) a", "f")
+
+  added <- compare_api(d_none, d_dots)
+  expect_equal(vapply(added$changes, `[[`, "", "type"), "dots_added")
+  expect_equal(vapply(added$changes, `[[`, "", "severity"), "feature")
+  expect_equal(suggest_version_bump(added)$bump, "minor")
+
+  removed <- compare_api(d_dots, d_none)
+  expect_equal(vapply(removed$changes, `[[`, "", "type"), "dots_removed")
+  expect_equal(vapply(removed$changes, `[[`, "", "severity"), "breaking")
+  expect_equal(suggest_version_bump(removed)$bump, "major")
+})
+
+test_that("moving dots relative to named arguments is breaking", {
+  d_old <- make_pkg("f <- function(a, ..., b = 1) a", "f")
+  d_new <- make_pkg("f <- function(a, b = 1, ...) a", "f")
+  d <- compare_api(d_old, d_new)
+  expect_true("arg_reordered" %in% vapply(d$changes, `[[`, "", "type"))
+  expect_equal(suggest_version_bump(d)$bump, "major")
+})
+
+test_that("an argument inserted before dots shifts positional callers", {
+  d_old <- make_pkg("f <- function(a, ...) a", "f")
+  d_new <- make_pkg("f <- function(a, b = 1, ...) a", "f")
+  d <- compare_api(d_old, d_new)
+  expect_equal(vapply(d$changes, `[[`, "", "type"), "arg_inserted")
+  expect_equal(suggest_version_bump(d)$bump, "major")
+})

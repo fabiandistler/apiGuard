@@ -2,7 +2,14 @@
 #   Rscript tests/smoke.R
 # Exercises the full pipeline against two fake packages.
 
-for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
+# From the package root the sources are used directly (no install needed);
+# under R CMD check there is no R/ next to the tests, so the installed
+# package is attached instead.
+if (dir.exists("R")) {
+  for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
+} else {
+  library(apiGuard)
+}
 
 make_pkg <- function(code, exports, version = "1.0.0") {
   dir <- tempfile("pkg-")
