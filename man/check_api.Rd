@@ -4,10 +4,12 @@
 \alias{check_api}
 \title{CI gate: fail if the API changed in a forbidden way}
 \usage{
-check_api(old, new, fail_on = c("breaking", "behaviour"))
+check_api(old, new, strict = FALSE, fail_on = "breaking")
 }
 \arguments{
 \item{old, new}{Snapshots or paths, as for \code{\link[=compare_api]{compare_api()}}.}
+
+\item{strict}{Treat behaviour-level changes (changed defaults) as breaking?}
 
 \item{fail_on}{Severities that should fail the check.}
 }
@@ -23,5 +25,8 @@ PR against the last release tag):
 }\if{html}{\out{</div>}}
 
 Exits non-zero (via \code{stop()}) when any change of a severity listed in
-\code{fail_on} is detected.
+\code{fail_on} is detected. The default matches \code{\link[=suggest_version_bump]{suggest_version_bump()}}:
+behaviour-level changes (a changed default) recommend a minor bump and do
+not fail the gate. Pass \code{strict = TRUE} to treat them as breaking in both
+places.
 }

@@ -62,23 +62,57 @@ compare_signature <- function(fn, old, new) {
 
   # Removed arguments: always breaking.
   for (a in setdiff(o_args, n_args)) {
-    out[[length(out) + 1]] <- record(
-      "arg_removed", fn,
-      sprintf("argument `%s` was removed (positional callers break)", a),
-      "breaking"
-    )
+    out[[length(out) + 1]] <- if (identical(a, "...")) {
+      record(
+        "dots_removed", fn,
+        "`...` was removed (callers passing extra arguments break)",
+        "breaking"
+      )
+    } else {
+      record(
+        "arg_removed", fn,
+        sprintf("argument `%s` was removed (positional callers break)", a),
+        "breaking"
+      )
+    }
   }
 
-  # Added arguments: breaking only when they have no default.
+  # Added arguments: an optional argument is only backwards compatible when it
+  # is appended behind every pre-existing argument. Inserting it earlier shifts
+  # the arguments that follow, which breaks positional callers silently.
+  positions <- which(n_args %in% o_args)
+  last_common <- if (length(positions)) max(positions) else 0L
   for (a in setdiff(n_args, o_args)) {
     i <- match(a, n_args)
+    if (identical(a, "...")) {
+      out[[length(out) + 1]] <- record(
+        "dots_added", fn, "`...` added", "feature"
+      )
+      next
+    }
     required <- is.na(n_def[i])
-    out[[length(out) + 1]] <- record(
-      if (required) "arg_added_required" else "arg_added_optional", fn,
-      sprintf("argument `%s` added (%s)", a,
-              if (required) "no default" else paste0("default: ", n_def[i])),
-      if (required) "breaking" else "feature"
-    )
+    if (required) {
+      out[[length(out) + 1]] <- record(
+        "arg_added_required", fn,
+        sprintf("argument `%s` added (no default)", a),
+        "breaking"
+      )
+    } else if (i < last_common) {
+      out[[length(out) + 1]] <- record(
+        "arg_inserted", fn,
+        sprintf(paste0("argument `%s` inserted at position %d (default: %s); ",
+                       "later arguments shift, positional callers ",
+                       "break silently"),
+                a, i, n_def[i]),
+        "breaking"
+      )
+    } else {
+      out[[length(out) + 1]] <- record(
+        "arg_added_optional", fn,
+        sprintf("argument `%s` added (default: %s)", a, n_def[i]),
+        "feature"
+      )
+    }
   }
 
   # Changed defaults on common arguments: behaviour change.
@@ -95,7 +129,8 @@ compare_signature <- function(fn, old, new) {
     }
   }
 
-  # Reordered common arguments: positional calls break.
+  # Reordered common arguments: positional calls break. `...` takes part in
+  # this check, so moving it relative to named arguments is caught here.
   common <- intersect(o_args, n_args)
   if (length(common) > 1L) {
     in_old <- o_args[o_args %in% n_args]

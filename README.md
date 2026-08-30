@@ -20,9 +20,12 @@ gap *before* release:
 |---|---|---|
 | Exported function removed | **breaking** | existing code breaks |
 | Argument removed | **breaking** | named & positional calls break |
+| `...` removed | **breaking** | callers passing extra arguments break |
 | Required argument added | **breaking** | old calls error |
+| Optional argument *inserted* before an existing one | **breaking** | later arguments shift, positional calls break silently |
 | Arguments reordered | **breaking** | positional calls break silently |
-| Optional argument added | feature | backwards compatible |
+| Optional argument *appended* at the end | feature | backwards compatible |
+| `...` added | feature | backwards compatible |
 | Function added | feature | backwards compatible |
 | Default value changed | behaviour | silent behaviour change (configurable: `strict = TRUE` -> breaking) |
 
@@ -52,14 +55,17 @@ cat(generate_news_section(diff, version = "2.0.0"))
   shell: bash
 ```
 
-Fails the build if breaking (or, by default, behaviour-level) changes are
-present without a major version bump decision.
+Fails the build on breaking changes. Behaviour-level changes (a changed
+default) only recommend a minor bump and do not fail the gate — pass
+`strict = TRUE` to `check_api()` to treat them as breaking too. The default
+deliberately matches `suggest_version_bump()`, so the gate never blocks a bump
+the tool itself recommends (see `docs/adr/0001-behaviour-change-policy.md`).
 
 ## Installation
 
 ```r
-# Not on CRAN (yet). PLACEHOLDER: replace with your GitHub org/user
-remotes::install_github("YOURUSER/apiGuard")
+# Not on CRAN (yet).
+remotes::install_github("fabiandistler/apiGuard")
 ```
 
 ## Roadmap / known limitations
