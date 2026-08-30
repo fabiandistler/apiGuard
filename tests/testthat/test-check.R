@@ -20,7 +20,8 @@ test_that("check_api agrees with suggest_version_bump on behaviour changes", {
   diff <- compare_api(d_old, d_new)
 
   expect_equal(suggest_version_bump(diff)$bump, "minor")
-  expect_output(expect_no_error(check_api(d_old, d_new)))
+  expect_output(lenient <- check_api(d_old, d_new))
+  expect_s3_class(lenient, "api_diff")
 
   expect_equal(suggest_version_bump(diff, strict = TRUE)$bump, "major")
   expect_output(

@@ -74,7 +74,7 @@ remotes::install_github("fabiandistler/apiGuard")
 - [ ] S4/R6 class signature comparison
 - [ ] Return-class heuristics via `roxygen2` `@return` tags
 - [ ] Reverse-dependency impact hint (query CRAN db for dependents of changed fns)
-- [ ] Published GitHub Action (`youruser/apiguard-action@v1`)
+- [ ] Published GitHub Action (`fabiandistler/apiguard-action@v1`)
 - Only **exported** functions are compared (by design); internal helpers are free to change
 - Static parsing does not evaluate code — functions created by factories/metaprogramming are not seen
 - After cloning, run `devtools::document()` to regenerate `NAMESPACE`/`man` from roxygen comments
