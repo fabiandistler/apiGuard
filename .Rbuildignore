@@ -6,3 +6,5 @@
 ^\.claude$
 ^\.github$
 ^\.git$
+^_pkgdown\.yml$
+^pkgdown$

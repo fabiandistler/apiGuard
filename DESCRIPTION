@@ -11,7 +11,7 @@ Description: Compares the public API of two versions of an R package
     package sources (no installation required) and can compare git refs,
     so it also works pre-CRAN-release.
 License: MIT + file LICENSE
-URL: https://github.com/fabiandistler/apiGuard
+URL: https://github.com/fabiandistler/apiGuard, https://fabiandistler.github.io/apiGuard/
 BugReports: https://github.com/fabiandistler/apiGuard/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
