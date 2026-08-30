@@ -1,6 +1,6 @@
 Package: apiGuard
 Title: Detect Breaking API Changes Between R Package Versions
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: person("YOUR", "NAME", email = "you@example.com",
     role = c("aut", "cre"),
     comment = "PLACEHOLDER: replace with your name/email")
