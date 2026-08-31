@@ -3,6 +3,7 @@
 ^AGENTS\.md$
 ^CONTEXT\.md$
 ^docs$
+^_site$
 ^\.claude$
 ^\.github$
 ^\.git$
