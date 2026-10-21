@@ -11,12 +11,21 @@ api_snapshot(path = ".")
 \code{DESCRIPTION} file).}
 }
 \value{
-An object of class \code{api_snapshot}.
+An object of class \code{api_snapshot}: \code{functions} holds the parsed
+signatures, \code{opaque} the names of exports without one.
 }
 \description{
 Statically parses the R sources of a package (no installation, no
 dependency resolution required) and records every exported function
 together with its formal arguments and their default values.
+}
+\details{
+Exports are read from \code{NAMESPACE}, including \code{exportPattern()}, which is
+matched against the package's top-level definitions. An alias (\code{f <- g})
+gets the signature of its target. An export without a parsed signature
+(a re-export, a non-function object, a function built by a factory) is
+kept by name in \code{opaque}, so its removal is still reported; the snapshot
+warns how many such exports there are.
 }
 \examples{
 \dontrun{

@@ -17,19 +17,30 @@ compare_api <- function(old, new) {
 
   old_f <- old$functions
   new_f <- new$functions
+  # Exports without a parsed signature are compared by name only.
+  old_names <- union(names(old_f), old$opaque)
+  new_names <- union(names(new_f), new$opaque)
   changes <- list()
 
-  for (fn in setdiff(names(old_f), names(new_f))) {
+  for (fn in setdiff(old_names, new_names)) {
     changes[[length(changes) + 1]] <- record(
       "function_removed", fn,
-      sprintf("exported function `%s()` was removed", fn),
+      if (fn %in% names(old_f)) {
+        sprintf("exported function `%s()` was removed", fn)
+      } else {
+        sprintf("export `%s` was removed", fn)
+      },
       "breaking"
     )
   }
-  for (fn in setdiff(names(new_f), names(old_f))) {
+  for (fn in setdiff(new_names, old_names)) {
     changes[[length(changes) + 1]] <- record(
       "function_added", fn,
-      sprintf("new exported function `%s()`", fn),
+      if (fn %in% names(new_f)) {
+        sprintf("new exported function `%s()`", fn)
+      } else {
+        sprintf("new export `%s`", fn)
+      },
       "feature"
     )
   }
