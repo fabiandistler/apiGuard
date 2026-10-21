@@ -41,7 +41,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-0-1-0-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-0-9000"></a></h3>
-<ul><li>An optional argument inserted <em>before</em> an existing argument is now reported as <code>arg_inserted</code> / breaking. It used to be classified as a feature, even though it silently shifts every following argument and changes what positional calls mean.</li>
+<ul><li>Adding an optional argument after <code>...</code>, or reordering arguments that all follow <code>...</code>, is no longer reported as breaking. Such arguments can only be matched by name, so an addition is <code>arg_added_optional</code> / feature and a reorder among them is not a change. Removing or renaming one stays breaking, and its message now says that named callers break (<a href="https://github.com/fabiandistler/apiGuard/issues/6" class="external-link">#6</a>).</li>
+<li>An optional argument inserted <em>before</em> an existing argument is now reported as <code>arg_inserted</code> / breaking. It used to be classified as a feature, even though it silently shifts every following argument and changes what positional calls mean.</li>
 <li>
 <code>...</code> is no longer mistaken for a required argument. Adding <code>...</code> is reported as <code>dots_added</code> / feature (it used to suggest a major bump); removing it is reported as <code>dots_removed</code> / breaking.</li>
 <li>

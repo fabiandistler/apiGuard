@@ -14,6 +14,12 @@
 
 ### Bug fixes
 
+- Adding an optional argument after `...`, or reordering arguments that
+  all follow `...`, is no longer reported as breaking. Such arguments
+  can only be matched by name, so an addition is `arg_added_optional` /
+  feature and a reorder among them is not a change. Removing or renaming
+  one stays breaking, and its message now says that named callers break
+  ([\#6](https://github.com/fabiandistler/apiGuard/issues/6)).
 - An optional argument inserted *before* an existing argument is now
   reported as `arg_inserted` / breaking. It used to be classified as a
   feature, even though it silently shifts every following argument and
