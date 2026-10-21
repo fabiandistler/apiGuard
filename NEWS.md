@@ -1,3 +1,15 @@
+# apiGuard 0.2.1
+
+* `api_snapshot()` no longer drops exports it cannot parse, so removing them is
+  now reported as `function_removed` / breaking (#7). In detail:
+  * `exportPattern()` is matched against the package's top-level definitions.
+    A pattern that matches nothing raises a warning.
+  * An alias (`f <- g`) gets the signature of `g`.
+  * A function assigned to a string name (`"%+%" <- function(a, b)`) is parsed.
+  * Re-exports and exported non-function objects are listed in the
+    snapshot's new `opaque` field and compared by name only.
+  * The snapshot warns how many exports have no parsed signature.
+
 # apiGuard 0.2.0
 
 ## Breaking changes
