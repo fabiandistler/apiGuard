@@ -19,7 +19,17 @@ api_snapshot(path = ".")
 
 ## Value
 
-An object of class `api_snapshot`.
+An object of class `api_snapshot`: `functions` holds the parsed
+signatures, `opaque` the names of exports without one.
+
+## Details
+
+Exports are read from `NAMESPACE`, including `exportPattern()`, which is
+matched against the package's top-level definitions. An alias (`f <- g`)
+gets the signature of its target. An export without a parsed signature
+(a re-export, a non-function object, a function built by a factory) is
+kept by name in `opaque`, so its removal is still reported; the snapshot
+warns how many such exports there are.
 
 ## Examples
 

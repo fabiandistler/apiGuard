@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">apiGuard</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -180,7 +180,7 @@
 <li><label><input type="checkbox">Reverse-dependency impact hint (query CRAN db for dependents of changed fns)</label></li>
 <li><label><input type="checkbox">Published GitHub Action (<code>fabiandistler/apiguard-action@v1</code>)</label></li>
 <li>Only <strong>exported</strong> functions are compared (by design); internal helpers are free to change</li>
-<li>Static parsing does not evaluate code — functions created by factories/metaprogramming are not seen</li>
+<li>Static parsing does not evaluate code — exports without a parsed signature (re-exports, non-function objects, functions built by factories) are compared by name only, and <code><a href="reference/api_snapshot.html">api_snapshot()</a></code> warns how many there are</li>
 <li>After cloning, run <code>devtools::document()</code> to regenerate <code>NAMESPACE</code>/<code>man</code> from roxygen comments</li>
 </ul>
 </div>
