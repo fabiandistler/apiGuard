@@ -76,7 +76,8 @@ remotes::install_github("fabiandistler/apiGuard")
 - [ ] Reverse-dependency impact hint (query CRAN db for dependents of changed fns)
 - [ ] Published GitHub Action (`fabiandistler/apiguard-action@v1`)
 - Only **exported** functions are compared (by design); internal helpers are free to change
-- Static parsing does not evaluate code — functions created by factories/metaprogramming are not seen
+- Static parsing does not evaluate code — exports without a parsed signature (re-exports, non-function objects,
+  functions built by factories) are compared by name only, and `api_snapshot()` warns how many there are
 - After cloning, run `devtools::document()` to regenerate `NAMESPACE`/`man` from roxygen comments
 
 ## Contributing

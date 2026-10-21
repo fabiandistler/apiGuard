@@ -4,9 +4,17 @@
 #' dependency resolution required) and records every exported function
 #' together with its formal arguments and their default values.
 #'
+#' Exports are read from `NAMESPACE`, including `exportPattern()`, which is
+#' matched against the package's top-level definitions. An alias (`f <- g`)
+#' gets the signature of its target. An export without a parsed signature
+#' (a re-export, a non-function object, a function built by a factory) is
+#' kept by name in `opaque`, so its removal is still reported; the snapshot
+#' warns how many such exports there are.
+#'
 #' @param path Path to the package source directory (must contain a
 #'   `DESCRIPTION` file).
-#' @return An object of class `api_snapshot`.
+#' @return An object of class `api_snapshot`: `functions` holds the parsed
+#'   signatures, `opaque` the names of exports without one.
 #' @export
 #' @examples
 #' \dontrun{
@@ -23,12 +31,24 @@ api_snapshot <- function(path = ".") {
   pkg <- unname(dcf[1, "Package"])
   ver <- unname(dcf[1, "Version"])
 
-  fns <- collect_functions(file.path(path, "R"))
-  exports <- read_exports(path, fallback = names(fns))
-  fns <- fns[intersect(exports, names(fns))]
+  defs <- collect_definitions(file.path(path, "R"))
+  exports <- resolve_exports(path, defs)
+  sigs <- lapply(exports, resolve_signature, defs = defs)
+  names(sigs) <- exports
+  has_sig <- !vapply(sigs, is.null, logical(1))
+  opaque <- sort(exports[!has_sig])
+  if (length(opaque)) {
+    warning(sprintf(
+      paste0("%d export(s) have no parsed signature and are compared by ",
+             "name only: %s"),
+      length(opaque), paste0("`", opaque, "`", collapse = ", ")
+    ), call. = FALSE)
+  }
+  fns <- sigs[has_sig]
 
   structure(
-    list(package = pkg, version = ver, functions = fns),
+    list(package = pkg, version = ver,
+         functions = fns[sort(names(fns))], opaque = opaque),
     class = "api_snapshot"
   )
 }
@@ -63,42 +83,48 @@ api_snapshot_ref <- function(ref, repo = ".") {
 
 # --- internals ---------------------------------------------------------------
 
-collect_functions <- function(r_dir) {
+# Every top-level assignment in R/, keyed by name; a later file or line
+# overrides an earlier one. Each value is the signature of a function, the
+# name an alias points to, or NULL for any other object.
+collect_definitions <- function(r_dir) {
   files <- list.files(r_dir, pattern = "\\.[rR]$", full.names = TRUE)
-  out <- list()
+  defs <- list()
   for (f in files) {
-    exprs <- parse(f, keep.source = FALSE)
-    for (e in exprs) {
-      nm <- assigned_function_name(e)
-      if (!is.null(nm)) out[[nm]] <- extract_signature(e)
+    for (e in parse(f, keep.source = FALSE)) {
+      def <- top_level_assignment(e)
+      if (is.null(def)) next
+      value <- def$value
+      defs[def$name] <- list(
+        if (is_function_call(value)) {
+          extract_signature(value)
+        } else if (is.symbol(value)) {
+          list(alias_of = as.character(value))
+        }
+      )
     }
   }
-  out[sort(names(out))]
+  defs
 }
 
-# Detect top-level `name <- function(...)`, `name = function(...)` and
-# `assign("name", function(...))`.
-assigned_function_name <- function(e) {
-  if (!is.call(e)) return(NULL)
+# Detect top-level `name <- value`, `"name" <- value`, `name = value` and
+# `assign("name", value)`.
+top_level_assignment <- function(e) {
+  if (!is.call(e) || length(e) < 3) return(NULL)
   op <- as.character(e[[1]])[1]
-  if (op %in% c("<-", "=") && length(e) >= 3) {
-    lhs <- e[[2]]; rhs <- e[[3]]
-    if (is.symbol(lhs) && is.call(rhs) &&
-        identical(as.character(rhs[[1]])[1], "function")) {
-      return(as.character(lhs))
-    }
-  }
-  if (op == "assign" && length(e) >= 3 && is.character(e[[2]])) {
-    rhs <- e[[3]]
-    if (is.call(rhs) && identical(as.character(rhs[[1]])[1], "function")) {
-      return(as.character(e[[2]]))
-    }
+  target <- e[[2]]
+  if (op %in% c("<-", "=") && is.symbol(target)) target <- as.character(target)
+  if (op %in% c("<-", "=", "assign") &&
+      is.character(target) && length(target) == 1) {
+    return(list(name = target, value = e[[3]]))
   }
   NULL
 }
 
-extract_signature <- function(assign_call) {
-  fn_call <- assign_call[[3]]
+is_function_call <- function(x) {
+  is.call(x) && identical(as.character(x[[1]])[1], "function")
+}
+
+extract_signature <- function(fn_call) {
   fmls <- as.list(fn_call[[2]])
   args <- names(fmls)
   if (is.null(args)) args <- rep("", length(fmls))
@@ -112,22 +138,40 @@ extract_signature <- function(assign_call) {
   list(args = args, defaults = unname(defaults))
 }
 
-read_exports <- function(path, fallback) {
-  ns_file <- file.path(path, "NAMESPACE")
-  if (!file.exists(ns_file)) return(fallback)
-  exprs <- parse(ns_file)
-  exps <- character()
-  for (e in exprs) {
-    if (is.call(e) && identical(as.character(e[[1]])[1], "export")) {
-      exps <- c(exps, vapply(as.list(e)[-1], as.character, character(1)))
-    }
+# Signature of `name`, following aliases; NULL when none can be parsed.
+resolve_signature <- function(name, defs, seen = character()) {
+  def <- defs[[name]]
+  if (is.null(def$alias_of)) return(def)
+  if (def$alias_of %in% seen) return(NULL)
+  resolve_signature(def$alias_of, defs, c(seen, name))
+}
+
+# Exported names: explicit exports plus every top-level definition matching
+# an exportPattern. Without a NAMESPACE every function definition counts.
+resolve_exports <- function(path, defs) {
+  path <- normalizePath(path)
+  if (!file.exists(file.path(path, "NAMESPACE"))) {
+    return(names(defs)[!vapply(defs, is.null, logical(1))])
   }
-  unique(exps)
+  ns <- parseNamespaceFile(basename(path), dirname(path))
+  matched <- lapply(ns$exportPatterns, grep, x = names(defs), value = TRUE)
+  empty <- ns$exportPatterns[lengths(matched) == 0L]
+  if (length(empty)) {
+    warning(sprintf(
+      "exportPattern(%s) matches no top-level definition in R/",
+      paste0('"', empty, '"', collapse = ", ")
+    ), call. = FALSE)
+  }
+  unique(c(ns$exports, unlist(matched)))
 }
 
 #' @export
 print.api_snapshot <- function(x, ...) {
-  cat(sprintf("<api_snapshot> %s %s -- %d exported function(s)\n",
+  cat(sprintf("<api_snapshot> %s %s -- %d exported function(s)",
               x$package, x$version, length(x$functions)))
+  if (length(x$opaque)) {
+    cat(sprintf(", %d export(s) without a parsed signature", length(x$opaque)))
+  }
+  cat("\n")
   invisible(x)
 }
