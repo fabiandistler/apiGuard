@@ -1,6 +1,6 @@
 Package: apiGuard
 Title: Detect Breaking API Changes Between R Package Versions
-Version: 0.1.0.9000
+Version: 0.2.0
 Authors@R: person("Fabian", "Distler", email = "fdistlermpi@gmail.com",
     role = c("aut", "cre"))
 Description: Compares the public API of two versions of an R package
