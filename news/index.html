@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">apiGuard</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,23 +33,23 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.1.0.9000" id="apiguard-0109000">apiGuard 0.1.0.9000<a class="anchor" aria-label="anchor" href="#apiguard-0109000"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="apiguard-020">apiGuard 0.2.0<a class="anchor" aria-label="anchor" href="#apiguard-020"></a></h2>
 <div class="section level3">
-<h3 id="breaking-changes-0-1-0-9000">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-1-0-9000"></a></h3>
+<h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
 <ul><li>
 <code><a href="../reference/check_api.html">check_api()</a></code> gained a <code>strict</code> argument and <code>fail_on</code> now defaults to <code>"breaking"</code> alone. Behaviour-level changes (a changed default) no longer fail the CI gate, which makes the gate agree with <code><a href="../reference/suggest_version_bump.html">suggest_version_bump()</a></code>. Pass <code>strict = TRUE</code> for the previous behaviour. See <code>docs/adr/0001-behaviour-change-policy.md</code>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-0-1-0-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-0-9000"></a></h3>
+<h3 id="bug-fixes-0-2-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
 <ul><li>Adding an optional argument after <code>...</code>, or reordering arguments that all follow <code>...</code>, is no longer reported as breaking. Such arguments can only be matched by name, so an addition is <code>arg_added_optional</code> / feature and a reorder among them is not a change. Removing or renaming one stays breaking, and its message now says that named callers break (<a href="https://github.com/fabiandistler/apiGuard/issues/6" class="external-link">#6</a>).</li>
-<li>An optional argument inserted <em>before</em> an existing argument is now reported as <code>arg_inserted</code> / breaking. It used to be classified as a feature, even though it silently shifts every following argument and changes what positional calls mean.</li>
+<li>An optional argument inserted <em>before</em> an existing argument is now reported as <code>arg_inserted</code> / breaking. It used to be classified as a feature, even though it silently shifts every following argument and changes what positional calls mean (<a href="https://github.com/fabiandistler/apiGuard/issues/4" class="external-link">#4</a>).</li>
 <li>
-<code>...</code> is no longer mistaken for a required argument. Adding <code>...</code> is reported as <code>dots_added</code> / feature (it used to suggest a major bump); removing it is reported as <code>dots_removed</code> / breaking.</li>
+<code>...</code> is no longer mistaken for a required argument. Adding <code>...</code> is reported as <code>dots_added</code> / feature (it used to suggest a major bump); removing it is reported as <code>dots_removed</code> / breaking (<a href="https://github.com/fabiandistler/apiGuard/issues/4" class="external-link">#4</a>).</li>
 <li>
-<code>tests/smoke.R</code> no longer fails under <code>R CMD check</code>. It sourced <code>R/</code> relative to the working directory, which does not exist next to the installed tests.</li>
+<code>tests/smoke.R</code> no longer fails under <code>R CMD check</code>. It sourced <code>R/</code> relative to the working directory, which does not exist next to the installed tests (<a href="https://github.com/fabiandistler/apiGuard/issues/4" class="external-link">#4</a>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="documentation-0-1-0-9000">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-0-9000"></a></h3>
+<h3 id="documentation-0-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0"></a></h3>
 <ul><li>Added <code>CONTEXT.md</code> (glossary) and <code>docs/adr/</code>.</li>
 <li>Added an <code>R-CMD-check</code> GitHub Actions workflow.</li>
 <li>Replaced the author, licence, and installation placeholders.</li>

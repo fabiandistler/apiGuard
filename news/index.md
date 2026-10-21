@@ -1,6 +1,6 @@
 # Changelog
 
-## apiGuard 0.1.0.9000
+## apiGuard 0.2.0
 
 ### Breaking changes
 
@@ -23,13 +23,16 @@
 - An optional argument inserted *before* an existing argument is now
   reported as `arg_inserted` / breaking. It used to be classified as a
   feature, even though it silently shifts every following argument and
-  changes what positional calls mean.
+  changes what positional calls mean
+  ([\#4](https://github.com/fabiandistler/apiGuard/issues/4)).
 - `...` is no longer mistaken for a required argument. Adding `...` is
   reported as `dots_added` / feature (it used to suggest a major bump);
-  removing it is reported as `dots_removed` / breaking.
+  removing it is reported as `dots_removed` / breaking
+  ([\#4](https://github.com/fabiandistler/apiGuard/issues/4)).
 - `tests/smoke.R` no longer fails under `R CMD check`. It sourced `R/`
   relative to the working directory, which does not exist next to the
-  installed tests.
+  installed tests
+  ([\#4](https://github.com/fabiandistler/apiGuard/issues/4)).
 
 ### Documentation
 
