@@ -108,3 +108,57 @@ test_that("an argument inserted before dots shifts positional callers", {
   expect_equal(vapply(d$changes, `[[`, "", "type"), "arg_inserted")
   expect_equal(suggest_version_bump(d)$bump, "major")
 })
+
+# Arguments after `...` can only be matched by name (#6).
+
+test_that("an optional argument inserted after dots is a feature", {
+  d_old <- make_pkg("f <- function(x, ..., b = 1) x", "f")
+  d_new <- make_pkg("f <- function(x, ..., a = 2, b = 1) x", "f")
+  d <- compare_api(d_old, d_new)
+  expect_equal(vapply(d$changes, `[[`, "", "type"), "arg_added_optional")
+  expect_equal(vapply(d$changes, `[[`, "", "severity"), "feature")
+  expect_equal(suggest_version_bump(d)$bump, "minor")
+})
+
+test_that("reordering arguments after dots is not a change", {
+  d_old <- make_pkg("f <- function(x, ..., a = 1, b = 1) x", "f")
+  d_new <- make_pkg("f <- function(x, ..., b = 1, a = 1) x", "f")
+  d <- compare_api(d_old, d_new)
+  expect_length(d$changes, 0)
+  expect_equal(suggest_version_bump(d)$bump, "patch")
+})
+
+test_that("a required argument added after dots is still breaking", {
+  d_old <- make_pkg("f <- function(x, ..., b = 1) x", "f")
+  d_new <- make_pkg("f <- function(x, ..., a, b = 1) x", "f")
+  d <- compare_api(d_old, d_new)
+  expect_equal(vapply(d$changes, `[[`, "", "type"), "arg_added_required")
+  expect_equal(suggest_version_bump(d)$bump, "major")
+})
+
+test_that("removing an argument after dots is breaking for named callers", {
+  d_old <- make_pkg("f <- function(x, ..., a = 1) x", "f")
+  d_new <- make_pkg("f <- function(x, ...) x", "f")
+  d <- compare_api(d_old, d_new)
+  expect_equal(vapply(d$changes, `[[`, "", "type"), "arg_removed")
+  expect_equal(vapply(d$changes, `[[`, "", "severity"), "breaking")
+  expect_match(d$changes[[1]]$detail, "named callers")
+  expect_equal(suggest_version_bump(d)$bump, "major")
+})
+
+test_that("renaming an argument after dots is breaking", {
+  d_old <- make_pkg("f <- function(x, ..., a = 1) x", "f")
+  d_new <- make_pkg("f <- function(x, ..., aa = 1) x", "f")
+  d <- compare_api(d_old, d_new)
+  types <- vapply(d$changes, `[[`, "", "type")
+  expect_true("arg_removed" %in% types)
+  expect_equal(suggest_version_bump(d)$bump, "major")
+})
+
+test_that("moving an argument from before dots to after dots is breaking", {
+  d_old <- make_pkg("f <- function(x, a = 1, ..., b = 1) x", "f")
+  d_new <- make_pkg("f <- function(x, ..., b = 1, a = 1) x", "f")
+  d <- compare_api(d_old, d_new)
+  expect_true("arg_reordered" %in% vapply(d$changes, `[[`, "", "type"))
+  expect_equal(suggest_version_bump(d)$bump, "major")
+})

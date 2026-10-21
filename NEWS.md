@@ -1,4 +1,4 @@
-# apiGuard 0.1.0.9000
+# apiGuard 0.2.0
 
 ## Breaking changes
 
@@ -10,24 +10,21 @@
 
 ## Bug fixes
 
-* `api_snapshot()` no longer drops exports it cannot parse, so removing them is
-  now reported as `function_removed` / breaking (#7). In detail:
-  * `exportPattern()` is matched against the package's top-level definitions.
-    A pattern that matches nothing raises a warning.
-  * An alias (`f <- g`) gets the signature of `g`.
-  * A function assigned to a string name (`"%+%" <- function(a, b)`) is parsed.
-  * Re-exports and exported non-function objects are listed in the
-    snapshot's new `opaque` field and compared by name only.
-  * The snapshot warns how many exports have no parsed signature.
+* Adding an optional argument after `...`, or reordering arguments that all
+  follow `...`, is no longer reported as breaking. Such arguments can only be
+  matched by name, so an addition is `arg_added_optional` / feature and a
+  reorder among them is not a change. Removing or renaming one stays breaking,
+  and its message now says that named callers break (#6).
 * An optional argument inserted *before* an existing argument is now reported as
   `arg_inserted` / breaking. It used to be classified as a feature, even though
   it silently shifts every following argument and changes what positional calls
-  mean.
+  mean (#4).
 * `...` is no longer mistaken for a required argument. Adding `...` is reported
   as `dots_added` / feature (it used to suggest a major bump); removing it is
-  reported as `dots_removed` / breaking.
-* `tests/smoke.R` no longer fails under `R CMD check`. It sourced `R/` relative
-  to the working directory, which does not exist next to the installed tests.
+  reported as `dots_removed` / breaking (#4).
+* `tests/smoke.R` no longer fails under `R CMD check`. It sourced `R/`
+  relative to the working directory, which does not exist next to the
+  installed tests (#4).
 
 ## Documentation
 

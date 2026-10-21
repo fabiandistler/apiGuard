@@ -71,6 +71,11 @@ compare_signature <- function(fn, old, new) {
   o_args <- old$args; n_args <- new$args
   o_def  <- old$defaults; n_def <- new$defaults
 
+  # Arguments after `...` can only be matched by name, so their position does
+  # not matter: they form a named set, not part of the positional sequence.
+  o_named <- named_only_args(o_args)
+  n_named <- named_only_args(n_args)
+
   # Removed arguments: always breaking.
   for (a in setdiff(o_args, n_args)) {
     out[[length(out) + 1]] <- if (identical(a, "...")) {
@@ -80,18 +85,20 @@ compare_signature <- function(fn, old, new) {
         "breaking"
       )
     } else {
+      callers <- if (a %in% o_named) "named callers" else "positional callers"
       record(
         "arg_removed", fn,
-        sprintf("argument `%s` was removed (positional callers break)", a),
+        sprintf("argument `%s` was removed (%s break)", a, callers),
         "breaking"
       )
     }
   }
 
   # Added arguments: an optional argument is only backwards compatible when it
-  # is appended behind every pre-existing argument. Inserting it earlier shifts
-  # the arguments that follow, which breaks positional callers silently.
-  positions <- which(n_args %in% o_args)
+  # is appended behind every pre-existing positional argument, or placed after
+  # `...`. Inserting it earlier shifts the arguments that follow, which breaks
+  # positional callers silently.
+  positions <- which(n_args %in% o_args & !n_args %in% n_named)
   last_common <- if (length(positions)) max(positions) else 0L
   for (a in setdiff(n_args, o_args)) {
     i <- match(a, n_args)
@@ -108,7 +115,7 @@ compare_signature <- function(fn, old, new) {
         sprintf("argument `%s` added (no default)", a),
         "breaking"
       )
-    } else if (i < last_common) {
+    } else if (i < last_common && !a %in% n_named) {
       out[[length(out) + 1]] <- record(
         "arg_inserted", fn,
         sprintf(paste0("argument `%s` inserted at position %d (default: %s); ",
@@ -142,10 +149,12 @@ compare_signature <- function(fn, old, new) {
 
   # Reordered common arguments: positional calls break. `...` takes part in
   # this check, so moving it relative to named arguments is caught here.
+  # Arguments that are named-only in both versions are compared as a set.
   common <- intersect(o_args, n_args)
   if (length(common) > 1L) {
-    in_old <- o_args[o_args %in% n_args]
-    in_new <- n_args[n_args %in% o_args]
+    stay_named <- intersect(o_named, n_named)
+    in_old <- positional_order(o_args[o_args %in% n_args], stay_named)
+    in_new <- positional_order(n_args[n_args %in% o_args], stay_named)
     if (!identical(in_old, in_new)) {
       out[[length(out) + 1]] <- record(
         "arg_reordered", fn,
@@ -156,4 +165,16 @@ compare_signature <- function(fn, old, new) {
   }
 
   out
+}
+
+# Arguments after `...`: callers can only supply them by name.
+named_only_args <- function(args) {
+  dots <- match("...", args)
+  if (is.na(dots)) character() else args[-seq_len(dots)]
+}
+
+# Order that matters to callers: arguments named-only in both versions are
+# sorted, so a reorder among them is ignored.
+positional_order <- function(args, stay_named) {
+  c(args[!args %in% stay_named], sort(args[args %in% stay_named]))
 }
