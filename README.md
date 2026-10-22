@@ -28,6 +28,7 @@ gap *before* release:
 | `...` added | feature | backwards compatible |
 | Function added | feature | backwards compatible |
 | Default value changed | behaviour | silent behaviour change (configurable: `strict = TRUE` -> breaking) |
+| Default **removed** (argument becomes required) | **breaking** | old calls that omitted the argument error |
 
 ## Usage
 

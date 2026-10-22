@@ -133,11 +133,22 @@ compare_signature <- function(fn, old, new) {
     }
   }
 
-  # Changed defaults on common arguments: behaviour change.
+  # Changed defaults on common arguments. Removing a default turns the argument
+  # into a required one: every old call that omitted it now errors, which is
+  # breaking (#8). A changed value, or a default added where there was none,
+  # keeps every existing call running — behaviour.
   for (a in intersect(o_args, n_args)) {
     od <- o_def[match(a, o_args)]
     nd <- n_def[match(a, n_args)]
-    if (!identical(od, nd) && !(is.na(od) && is.na(nd))) {
+    default_removed <- !is.na(od) && is.na(nd)
+    if (default_removed) {
+      out[[length(out) + 1]] <- record(
+        "default_removed", fn,
+        sprintf("default of `%s` removed (was %s); argument is now required",
+                a, na_to_missing(od)),
+        "breaking"
+      )
+    } else if (!identical(od, nd) && !(is.na(od) && is.na(nd))) {
       out[[length(out) + 1]] <- record(
         "default_changed", fn,
         sprintf("default of `%s` changed: %s -> %s",
