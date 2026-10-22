@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/fabiandistler/apiGuard/blob/v0.2.1/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/fabiandistler/apiGuard/blob/main/DESCRIPTION)
 
 Distler F (2026). *apiGuard: Detect Breaking API Changes Between R
 Package Versions*. R package version 0.2.1,
