@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">apiGuard</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,7 @@
 <p><strong>Snapshot</strong>: The Public API of one version of one package, captured by statically parsing its sources. A Snapshot is a fact about a version, never about a change. <em>Avoid</em>: scan, dump, state</p>
 <p><strong>Diff</strong>: The comparison of two Snapshots, expressed as an ordered set of Change Records. <em>Avoid</em>: delta, comparison, report</p>
 <p><strong>Change Record</strong>: One difference between two Snapshots, carrying its kind, the function it belongs to, a human-readable detail, and exactly one Severity. <em>Avoid</em>: finding, issue, violation</p>
+<p><strong>Change Kind</strong>: What a Change Record says happened in the Public API: a function was added or removed, an argument was removed, reordered, added as required, inserted, or added as optional, <code>...</code> was added or removed, or a default was removed or changed. Exactly eleven values exist and every Change Record has exactly one. <em>Avoid</em>: type, category, change class</p>
 <p><strong>Severity</strong>: The consequence a Change Record has for existing calling code. Exactly three values exist — Breaking, Feature, Behaviour — and every Change Record has one. <em>Avoid</em>: level, priority, class</p>
 <p><strong>Breaking</strong>: Existing calling code stops working or silently changes meaning. Covers loud failures (a removed function, a new required argument) and silent ones (a positional argument shifting to a different meaning). Both are Breaking; the silent case is the one the tool exists to catch. <em>Avoid</em>: major, incompatible</p>
 <p><strong>Feature</strong>: New capability that no existing call can observe. All existing calls keep working and keep meaning the same thing. <em>Avoid</em>: minor, addition, enhancement</p>
