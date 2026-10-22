@@ -57,7 +57,6 @@ test_that("required new argument is breaking, optional is feature", {
 test_that("removing a default is breaking (#8), adding a first default is behaviour", {
   d_old <- make_pkg("f <- function(x, y = 1) x + y", "f")
   d_req <- make_pkg("f <- function(x, y) y", "f")
-  d_opt <- make_pkg("f <- function(x, y = 2) x + y", "f")
 
   d <- compare_api(d_old, d_req)
   expect_equal(vapply(d$changes, `[[`, "", "type"), "default_removed")
@@ -70,7 +69,7 @@ test_that("removing a default is breaking (#8), adding a first default is behavi
   )
 
   # Adding a default keeps every existing call running: behaviour, not break.
-  d <- compare_api(d_old, d_opt)
+  d <- compare_api(d_req, make_pkg("f <- function(x, y = 2) x + y", "f"))
   expect_equal(vapply(d$changes, `[[`, "", "type"), "default_changed")
   expect_equal(vapply(d$changes, `[[`, "", "severity"), "behaviour")
   expect_equal(suggest_version_bump(d)$bump, "minor")
