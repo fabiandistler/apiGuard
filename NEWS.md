@@ -1,3 +1,13 @@
+# apiGuard 0.2.1.9000
+
+## Bug fixes
+
+* Removing a default value from an argument is now reported as
+  `default_removed` / breaking: the argument becomes required, so every old
+  call that omitted it now errors. It used to be graded
+  `default_changed` / behaviour, which let `check_api()` pass and
+  `suggest_version_bump()` recommend only a minor bump (#8).
+
 # apiGuard 0.2.1
 
 * `api_snapshot()` no longer drops exports it cannot parse, so removing them is
