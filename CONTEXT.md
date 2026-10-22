@@ -26,6 +26,13 @@ One difference between two Snapshots, carrying its kind, the function it belongs
 to, a human-readable detail, and exactly one Severity.
 _Avoid_: finding, issue, violation
 
+**Change Kind**:
+What a Change Record says happened in the Public API: a function was added or
+removed, an argument was removed, reordered, added as required, inserted, or
+added as optional, `...` was added or removed, or a default was removed or
+changed. Exactly eleven values exist and every Change Record has exactly one.
+_Avoid_: type, category, change class
+
 **Severity**:
 The consequence a Change Record has for existing calling code. Exactly three
 values exist — Breaking, Feature, Behaviour — and every Change Record has one.

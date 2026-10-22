@@ -183,3 +183,14 @@ test_that("moving an argument from before dots to after dots is breaking", {
   expect_true("arg_reordered" %in% vapply(d$changes, `[[`, "", "type"))
   expect_equal(suggest_version_bump(d)$bump, "major")
 })
+
+test_that("records reject kinds and severities outside the vocabulary (#15)", {
+  expect_error(
+    apiGuard:::record("arg_addded", "f", "typo build", "breaking"),
+    "not a known Change Kind"
+  )
+  expect_error(
+    apiGuard:::record("arg_removed", "f", "detail", "major"),
+    "not a known Severity"
+  )
+})
