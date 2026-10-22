@@ -62,7 +62,23 @@ as_snapshot <- function(x) {
   stop("`old`/`new` must be an api_snapshot or a path.", call. = FALSE)
 }
 
+# The Change Kind vocabulary (CONTEXT.md): every value the classifier can
+# emit, enumerated once beside the constructor that stamps it.
+change_kinds <- c(
+  "function_added", "function_removed",
+  "arg_added_required", "arg_inserted", "arg_added_optional", "arg_removed",
+  "arg_reordered",
+  "dots_added", "dots_removed",
+  "default_changed", "default_removed"
+)
+
+change_severities <- c("breaking", "feature", "behaviour")
+
 record <- function(type, fn, detail, severity) {
+  stopifnot(
+    "`type` is not a known Change Kind" = type %in% change_kinds,
+    "`severity` is not a known Severity" = severity %in% change_severities
+  )
   list(type = type, fn = fn, detail = detail, severity = severity)
 }
 
