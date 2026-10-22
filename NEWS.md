@@ -1,6 +1,4 @@
-# apiGuard 0.2.1.9000
-
-## Bug fixes
+# apiGuard 0.2.2
 
 * Removing a default value from an argument is now reported as
   `default_removed` / breaking: the argument becomes required, so every old
